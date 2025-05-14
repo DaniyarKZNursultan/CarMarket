@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
-from .models import AutoCenter, CarBrand, CarImage, NewCarImage, UsedCar, NewCar, User
+from .models import AutoCenter, Car, CarBrand, CarImage, NewCarImage, UsedCar, NewCar, User
 
 
 def home(request):
@@ -273,6 +273,11 @@ def create_new_car(request):
     else:
         form = NewCarForm(user=request.user)
     return render(request, 'main/cars/create_new_car.html', {'form': form})
+
+
+def new_car_detail(request, pk):
+    car = get_object_or_404(NewCar, pk=pk)
+    return render(request, 'new_car_detail.html', {'car': car})
 
 
 

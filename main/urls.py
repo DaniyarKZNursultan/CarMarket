@@ -16,6 +16,7 @@ urlpatterns = [
 
     path('new-cars/', views.NewCarPageView.as_view(), name='new_cars'),
     path('new-cars/create/', views.create_new_car, name='create_new_car'),
+    path('new-car/<int:pk>/', views.new_car_detail, name='new_car_detail'),
 
     path('dealer/dashboard/', views.dealer_dashboard, name='dealer_dashboard'),
     path('dealer/new-car/', views.create_new_car, name='create_new_car'),

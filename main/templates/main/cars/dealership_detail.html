@@ -1,62 +1,141 @@
 {% extends 'main/base.html' %}
 {% load static %}
-{% load humanize %}
+
+{% block title %}{{ dealership.name }} - CarMarket{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
-  <!-- Блок автосалона -->
-  <div class="bg-white rounded-2xl shadow-lg p-6 md:flex md:items-center md:justify-between mb-10 border border-gray-100">
-    <div class="flex items-center gap-6">
-      {% if dealership.logo %}
-        <img src="{{ dealership.logo.url }}" alt="{{ dealership.name }}" class="w-20 h-20 object-contain rounded-lg border border-gray-200 shadow-sm">
-      {% endif %}
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">{{ dealership.name }}</h1>
-        <p class="text-gray-500 mt-1 text-sm max-w-md">{{ dealership.description }}</p>
-      </div>
-    </div>
-    <div class="mt-4 md:mt-0">
-      <button id="helpButton" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-xl shadow transition duration-200">
-        Нужна помощь?
-      </button>
-    </div>
-  </div>
-
-  <!-- Представляемые бренды -->
-  <h2 class="text-2xl font-semibold text-gray-800 mb-4">Представляемые бренды</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6 mb-12">
-    {% for brand in brands %}
-      <div class="bg-gray-50 hover:bg-white transition border border-gray-200 rounded-xl p-4 flex flex-col items-center shadow-sm">
-        {% if brand.logo %}
-          <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="h-10 mb-2 object-contain" />
-        {% endif %}
-        <span class="text-sm text-gray-700 font-medium text-center">{{ brand.name }}</span>
-      </div>
-    {% empty %}
-      <p class="text-gray-600 col-span-full">Нет информации о брендах.</p>
-    {% endfor %}
-  </div>
-
-  <!-- Автомобили -->
-  <h2 class="text-2xl font-semibold text-gray-800 mb-4">Автомобили в наличии</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for car in cars %}
-      <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-lg hover:shadow-xl transition duration-200">
-        {% if car.image %}
-          <img src="{{ car.image.url }}" alt="{{ car.model }}" class="h-52 w-full object-cover">
-        {% endif %}
-        <div class="p-5">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="text-lg font-bold text-gray-900">{{ car.brand.name }} {{ car.model }}</h3>
-            <span class="text-green-600 font-semibold text-base">{{ car.price|intcomma }} ₸</span>
-          </div>
-          <p class="text-gray-500 text-sm">{{ car.year }} • {{ car.engine_type }}</p>
+<div class="container mt-4">
+    <!-- Шапка автодилера -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="row g-0">
+            <div class="col-md-3 d-flex align-items-center justify-content-center bg-light p-4">
+                {% if dealership.logo %}
+                <img src="{{ dealership.logo.url }}" class="img-fluid" alt="{{ dealership.name }}" style="max-height: 120px;">
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="bi bi-building fs-1"></i>
+                    <p class="mb-0">Нет логотипа</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <div class="card-body">
+                    <h1 class="card-title mb-3">{{ dealership.name }}</h1>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% if dealership.address %}
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-geo-alt me-1"></i> {{ dealership.address }}
+                        </span>
+                        {% endif %}
+                        {% if dealership.phone %}
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-telephone me-1"></i> {{ dealership.phone }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if dealership.description %}
+                    <p class="card-text">{{ dealership.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-      </div>
-    {% empty %}
-      <p class="text-gray-600 col-span-full">Автомобили пока не добавлены.</p>
-    {% endfor %}
-  </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Фильтр автомобилей</h5>
+            <form class="row g-3">
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Марка</option>
+                        <option>Все</option>
+                        {% for brand in brands %}
+                        <option>{{ brand }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Модель</option>
+                        <option>Все</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Год</option>
+                        <option>Все</option>
+                        {% for year in years %}
+                        <option>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Применить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список автомобилей -->
+    <h3 class="mb-4">Автомобили в наличии ({{ cars.count }})</h3>
+    
+    {% if cars %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for car in cars %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="position-relative">
+                    {% if car.image %}
+                    <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.brand }} {{ car.model }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-car-front fs-1 text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <span class="position-absolute top-0 end-0 bg-primary text-white p-2 small">
+                        {{ car.year }} год
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">{{ car.mileage }} км</span>
+                        <span class="text-muted small">{{ car.get_transmission_display }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-primary fs-5">{{ car.price }} ₸</span>
+                        {% comment %} <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-outline-primary">
+                            Подробнее <i class="bi bi-chevron-right"></i>
+                        </a> {% endcomment %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        В этом автосалоне пока нет автомобилей в наличии.
+    </div>
+    {% endif %}
 </div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .breadcrumb {
+        background-color: #f8f9fa;
+    }
+    .badge.border {
+        border: 1px solid #dee2e6 !important;
+    }
+</style>
 {% endblock %}
