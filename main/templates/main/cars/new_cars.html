@@ -1,0 +1,172 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Фильтр -->
+  <div class="mb-5">
+    <h2 class="mb-4 fw-bold">Поиск новых автомобилей</h2>
+    <form method="get" class="row g-3 align-items-end bg-light p-4 rounded shadow-sm">
+      <div class="col-md-3">
+        <label class="form-label">Марка</label>
+        {{ form.brand|add_class:"form-select" }}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Город</label>
+        {{ form.city|add_class:"form-select" }}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Мин. цена (₸)</label>
+        {{ form.min_price|add_class:"form-control" }}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Макс. цена (₸)</label>
+        {{ form.max_price|add_class:"form-control" }}
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary">Найти</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Бренды -->
+  <section class="mb-5">
+    <h3 class="mb-4 fw-bold">Бренды</h3>
+    <div class="row row-cols-2 row-cols-md-4 g-4">
+      {% for brand in brands %}
+        <div class="col">
+          <div class="card h-100 text-center border-0 shadow-sm">
+            <img src="{{ brand.logo.url }}" class="card-img-top p-3" style="max-height: 120px; object-fit: contain;" alt="{{ brand.name }}">
+            <div class="card-body">
+              <h5 class="card-title mb-1">{{ brand.name }}</h5>
+              <small class="text-muted">{{ brand.description|truncatechars:60 }}</small>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Новые автомобили -->
+  <section class="mb-5">
+    <h3 class="mb-4 fw-bold">Автомобили в наличии</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for car in filtered_cars %}
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            {% if car.preview_image %}
+              <img src="{{ car.preview_image }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+              <p class="card-text text-muted mb-1">Год: {{ car.year }}</p>
+              <p class="card-text mb-1">Цена: <strong>{{ car.price|floatformat:0 }} ₸</strong></p>
+              <small class="text-muted">Город: {{ car.city }}</small>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col">
+          <p>Ничего не найдено по вашему запросу.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Популярные -->
+  <section class="mb-5">
+    <h3 class="mb-4 fw-bold">Популярные модели</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for car in popular_cars %}
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm">
+            {% if car.preview_image %}
+              <img src="{{ car.preview_image }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+              <p class="card-text text-muted mb-1">Год: {{ car.year }}</p>
+              <p class="card-text">Цена: <strong>{{ car.price|floatformat:0 }} ₸</strong></p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Автосалоны -->
+  <section class="mb-5">
+    <h3 class="mb-4 fw-bold">Проверенные автосалоны</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for salon in auto_centers %}
+        <div class="col">
+          <a href="{% url 'dealership_detail' salon.pk %}" class="text-decoration-none text-dark">
+            <div class="card h-100 border-0 shadow-sm">
+              {% if salon.images %}
+                <img src="{{ salon.images.url }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ salon.name }}">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ salon.name }}</h5>
+                <p class="card-text text-muted">{{ salon.city }}</p>
+                <p class="card-text">{{ salon.address }}</p>
+                <p class="card-text"><strong>Тел:</strong> {{ salon.phone }}</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Кредитный калькулятор -->
+  <section>
+    <h3 class="mb-4 fw-bold">Кредитный калькулятор</h3>
+    <form id="loanCalculator" class="row g-3 bg-light p-4 rounded shadow-sm">
+      <div class="col-md-4">
+        <label class="form-label">Стоимость авто (₸)</label>
+        <input type="number" class="form-control" id="carPrice" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Первоначальный взнос (₸)</label>
+        <input type="number" class="form-control" id="downPayment" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Срок (мес.)</label>
+        <select class="form-select" id="loanTerm" required>
+          {% for term in loan_terms %}
+            <option value="{{ term }}">{{ term }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-success">Рассчитать</button>
+      </div>
+    </form>
+    <div class="mt-4">
+      <h5>Ежемесячный платеж: <span id="monthlyPayment" class="text-primary">-</span> ₸</h5>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  document.getElementById('loanCalculator').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const price = parseFloat(document.getElementById('carPrice').value);
+    const down = parseFloat(document.getElementById('downPayment').value);
+    const term = parseInt(document.getElementById('loanTerm').value);
+    const loanAmount = price - down;
+    const monthlyRate = 0.02;
+
+    if (loanAmount <= 0 || isNaN(loanAmount)) {
+      document.getElementById('monthlyPayment').innerText = 'Введите корректные данные';
+      return;
+    }
+
+    const monthlyPayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -term));
+    document.getElementById('monthlyPayment').innerText = monthlyPayment.toFixed(0);
+  });
+</script>
+{% endblock %}

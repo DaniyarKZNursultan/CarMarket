@@ -1,0 +1,206 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+
+        <!-- ФИЛЬТРЫ -->
+        <div class="col-md-3 mb-4">
+            <form method="get" class="bg-light p-3 rounded shadow-sm">
+                <h5 class="mb-3">Фильтры</h5>
+            
+                <!-- Город -->
+                <div class="mb-2">
+                    <label for="city" class="form-label">Город</label>
+                    <select name="city" id="city" class="form-select">
+                        <option value="">Любой</option>
+                        {% for code, name in cities %}
+                            <option value="{{ code }}" {% if filters.city == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Марка -->
+                <div class="mb-2">
+                    <label for="brand" class="form-label">Марка</label>
+                    <input type="text" name="brand" id="brand" class="form-control" value="{{ filters.brand }}">
+                </div>
+            
+                <!-- Модель -->
+                <div class="mb-2">
+                    <label for="model" class="form-label">Модель</label>
+                    <input type="text" name="model" id="model" class="form-control" value="{{ filters.model }}">
+                </div>
+            
+                <!-- Цена -->
+                <div class="mb-2">
+                    <label class="form-label">Цена (₸)</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" name="price_min" class="form-control" placeholder="от" value="{{ filters.price_min }}">
+                        <input type="number" name="price_max" class="form-control" placeholder="до" value="{{ filters.price_max }}">
+                    </div>
+                </div>
+            
+                <!-- Год -->
+                <div class="mb-2">
+                    <label class="form-label">Год выпуска</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" name="year_min" class="form-control" placeholder="от" value="{{ filters.year_min }}">
+                        <input type="number" name="year_max" class="form-control" placeholder="до" value="{{ filters.year_max }}">
+                    </div>
+                </div>
+            
+                <!-- Пробег -->
+                <div class="mb-2">
+                    <label for="mileage_max" class="form-label">Пробег до (км)</label>
+                    <input type="number" name="mileage_max" id="mileage_max" class="form-control" value="{{ filters.mileage_max }}">
+                </div>
+            
+                <!-- Тип кузова -->
+                <div class="mb-2">
+                    <label for="body_type" class="form-label">Тип кузова</label>
+                    <select name="body_type" id="body_type" class="form-select">
+                        <option value="">Любой</option>
+                        {% for val, label in body_types %}
+                            <option value="{{ val }}" {% if filters.body_type == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Тип двигателя -->
+                <div class="mb-2">
+                    <label for="engine" class="form-label">Тип двигателя</label>
+                    <select name="engine" id="engine" class="form-select">
+                        <option value="">Любой</option>
+                        {% for val, label in engines %}
+                            <option value="{{ val }}" {% if filters.engine == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Трансмиссия -->
+                <div class="mb-2">
+                    <label for="transmission" class="form-label">Трансмиссия</label>
+                    <select name="transmission" id="transmission" class="form-select">
+                        <option value="">Любая</option>
+                        {% for val, label in transmissions %}
+                            <option value="{{ val }}" {% if filters.transmission == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Привод -->
+                <div class="mb-2">
+                    <label for="drive" class="form-label">Привод</label>
+                    <select name="drive" id="drive" class="form-select">
+                        <option value="">Любой</option>
+                        {% for val, label in drives %}
+                            <option value="{{ val }}" {% if filters.drive == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Кредит и растаможка -->
+                <div class="form-check form-switch my-2">
+                    <input class="form-check-input" type="checkbox" name="credit" id="credit" {% if filters.credit %}checked{% endif %}>
+                    <label class="form-check-label" for="credit">Доступно в кредит</label>
+                </div>
+            
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="customs" id="customs" {% if filters.customs %}checked{% endif %}>
+                    <label class="form-check-label" for="customs">Растаможен в РК</label>
+                </div>
+            
+                <button type="submit" class="btn btn-primary w-100">Показать</button>
+            </form>            
+        </div>
+
+        <!-- СПИСОК МАШИН -->
+        <div class="col-md-9">
+
+            <!-- Сортировка -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Найдено {{ page_obj.paginator.count }} объявлений</h5>
+
+                <select name="sort" class="form-select w-auto" onchange="this.form.submit()"
+                        form="sort-form">
+                    <option value="">Сортировка по умолчанию</option>
+                    <option value="price_asc" {% if filters.sort == 'price_asc' %}selected{% endif %}>Сначала дешёвые</option>
+                    <option value="price_desc" {% if filters.sort == 'price_desc' %}selected{% endif %}>Сначала дорогие</option>
+                    <option value="year_desc" {% if filters.sort == 'year_desc' %}selected{% endif %}>Сначала новые</option>
+                </select>
+
+                <!-- форма сортировки -->
+                <form id="sort-form" method="get" style="display:none">
+                    {% for key, value in filters.items %}
+                        {% if key != "sort" %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endfor %}
+                </form>
+            </div>
+
+            <!-- Карточки -->
+            <div class="row">
+                {% for car in page_obj %}
+                    <div class="col-md-4 mb-4">
+                        <a href="{% url 'used_car_detail' car.id %}" class="text-decoration-none text-dark">
+                            <div class="card shadow-sm h-100">
+                                {% with car.images.first as first_image %}
+                                    {% if first_image %}
+                                        <img src="{{ first_image.image.url }}" class="card-img-top card-img-fixed" alt="{{ car.brand }} {{ car.model }}">
+                                    {% else %}
+                                        <img src="{% static 'img/no-image.png' %}" class="card-img-top card-img-fixed" alt="Нет фото">
+                                    {% endif %}
+                                {% endwith %}
+            
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ car.brand }} {{ car.model }} ({{ car.year }})</h6>
+                                    <p class="text-primary fw-bold">{{ car.price|floatformat:0 }} ₸</p>
+                                    <p class="card-text small">
+                                        {{ car.body_type }}, {{ car.drive|capfirst }} привод<br>
+                                        {{ car.transmission|capfirst }}, {{ car.engine_capacity }} л<br>
+                                        Пробег: {{ car.mileage }} км<br>
+                                        Город: {{ car.city }}
+                                    </p>
+                                </div>
+            
+                                <div class="card-footer text-muted small">
+                                    Добавлено: {{ car.created_at|date:"d.m.Y" }}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}       
+            </div>
+            
+
+            <!-- Пагинация -->
+            {% if page_obj.has_other_pages %}
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in filters.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">Назад</a>
+                            </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?{% for key, value in filters.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in filters.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Вперёд</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

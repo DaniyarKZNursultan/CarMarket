@@ -1,0 +1,84 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <!-- Левая колонка: Аватар и информация -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle mb-3" width="150" height="150">
+            {% else %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png" alt="Аватар" class="rounded-circle mb-3" width="150" height="150">
+            {% endif %}
+            <h4 class="card-title">{{ user.first_name }} {{ user.last_name }}</h4>
+            <p class="text-muted">{{ user.email }}</p>
+            <p class="text-muted">Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
+            {% if user.role == 'admin' %}
+                <span class="badge bg-success">Администратор</span>
+            {% elif user.role == 'dealer_employee' %}
+                <span class="badge bg-warning">Сотрудник автосалона</span>
+                {% if user.auto_center %}
+                    <div class="mt-2 text-muted small">Автосалон: <strong>{{ user.auto_center.name }}</strong></div>
+                    <div class="text-muted small">Город: {{ user.auto_center.get_city_display }}</div>
+                {% endif %}
+            {% else %}
+                <span class="badge bg-secondary">Пользователь</span>
+            {% endif %}
+        </div>        
+      </div>
+    </div>
+
+    <!-- Правая колонка: Статистика и действия -->
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Мои объявления</h5>
+          <div class="row">
+            {% if user_ads %}
+            <ul class="list-group">
+              {% for ad in user_ads %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <a href="{% url 'used_car_detail' ad.id %}" class="text-decoration-none text-dark">
+                    <div class="d-flex align-items-center">
+                      <!-- Фото объявления -->
+                      {% if ad.images.all %}
+                        <img src="{{ ad.images.first.image.url }}" alt="{{ ad.brand }} {{ ad.model }}" class="img-thumbnail" width="100">
+                      {% else %}
+                        <img src="{% static 'img/no-image.png' %}" alt="Нет фото" class="img-thumbnail" width="100">
+                      {% endif %}
+                      <!-- Информация об объявлении -->
+                      <div class="ms-3">
+                        <strong>{{ ad.brand }} {{ ad.model }} ({{ ad.year }})</strong><br>
+                        Цена: {{ ad.price }}<br>
+                        Город: {{ ad.city }}<br>
+                      </div>
+                    </div>
+                  </a>
+                  <form method="post" action="{% url 'delete_used_car' ad.id %}" onsubmit="return confirm('Вы уверены, что хотите удалить это объявление?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>            
+            {% else %}
+              <p class="text-muted">У вас нет объявлений.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">Редактировать профиль</a>
+        <a href="{% url 'create_used_car' %}" class="btn btn-success">Создать объявление</a>
+        <a href="{% url 'logout' %}" class="btn btn-outline-danger">Выйти</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

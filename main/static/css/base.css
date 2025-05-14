@@ -1,0 +1,4 @@
+.card-img-fixed {
+    height: 200px; /* Задай нужную высоту */
+    object-fit: cover;
+}

@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+    <header class="header d-flex align-items-center px-4 py-3 border-bottom">
+        <!-- Контейнер для всего хедера -->
+        <div class="container d-flex justify-content-between align-items-center">
+          
+          <!-- Название сайта слева -->
+          <a class="site-name fw-bold fs-4 text-dark" href="{% url 'home' %}">CarKey</a>
+      
+          <!-- Компоненты справа -->
+          <ul class="nav nav-pills">
+            <li class="nav-item">
+              <a class="nav-link text-black-50" aria-current="page" href="{% url 'used_cars' %}">Авто с пробегом</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-black-50" href="{% url 'new_cars' %}">Новые авто</a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-black-50" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Автосалоны</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item text-black-50" href="#">Hyundai</a></li>
+                <li><a class="dropdown-item text-black-50" href="#">Changan</a></li>
+                <li><a class="dropdown-item text-black-50" href="#">Tank</a></li>
+                <li><a class="dropdown-item text-black-50" href="#">Haval</a></li>
+              </ul>
+            </li>
+
+            <!-- Иконка авторизации -->
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{% url 'profile' %}">{{ user.first_name }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{% url 'logout' %}">Выйти</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link active" href="{% url 'create_used_car' %}">Создать объявление</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{% url 'login' %}">Войти</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="{% url 'register' %}">Регистрация</a>
+                </li>
+            {% endif %}
+
+            <!-- Смена языка -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-black-50" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                <i class="bi bi-globe"></i> Язык
+                </a>
+                <ul class="dropdown-menu">
+                <li><a class="dropdown-item text-black-50" href="#">Русский</a></li>
+                <li><a class="dropdown-item text-black-50" href="#">English</a></li>
+                <li><a class="dropdown-item text-black-50" href="#">Қазақ</a></li>
+                </ul>
+            </li>
+          </ul>
+        </div>
+      </header>
+      
+    <div class="container">
+        {% block content %}{% endblock content %}
+    </div>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

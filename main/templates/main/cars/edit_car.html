@@ -1,0 +1,49 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Редактировать авто: {{ car.brand }} {{ car.model }}</h2>
+
+  <form method="post" enctype="multipart/form-data" class="row g-3 bg-light p-4 rounded shadow-sm">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="col-md-6">
+        {% if field.field.widget.input_type == "checkbox" %}
+          <div class="form-check mt-4">
+            {{ field|add_class:"form-check-input" }}
+            <label class="form-check-label" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+          </div>
+        {% else %}
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    
+          {% if field.field.choices %}
+            {{ field|add_class:"form-select" }}
+          {% else %}
+            {{ field|add_class:"form-control" }}
+          {% endif %}
+        {% endif %}
+    
+        {% if field.errors %}
+          <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    
+
+    <div class="col-md-12">
+      <label class="form-label">Загрузить новые изображения (если нужно)</label>
+      <input type="file" name="images" class="form-control" multiple>
+    </div>
+
+    <div class="col-12 text-end">
+      <a href="{% url 'dealer_dashboard' %}" class="btn btn-secondary">Отмена</a>
+      <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

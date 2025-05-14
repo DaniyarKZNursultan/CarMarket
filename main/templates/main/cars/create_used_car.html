@@ -1,0 +1,204 @@
+{% extends "main/base.html" %}
+{% load form_filters %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Добавить поддержанный автомобиль</h2>
+        <p class="text-muted">Заполните информацию об автомобиле, чтобы разместить объявление</p>
+    </div>
+    
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-4">
+                    <!-- Бренд и модель -->
+                    <div class="col-md-6">
+                        <label for="id_brand" class="form-label">Марка</label>
+                        {{ form.brand|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_model" class="form-label">Модель</label>
+                        {{ form.model|add_class:"form-control" }}
+                    </div>
+
+                    <!-- Год, цена, пробег -->
+                    <div class="col-md-4">
+                        <label for="id_year" class="form-label">Год выпуска</label>
+                        {{ form.year|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_price" class="form-label">Цена</label>
+                        {{ form.price|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_mileage" class="form-label">Пробег (км)</label>
+                        {{ form.mileage|add_class:"form-control" }}
+                    </div>
+
+                    <!-- Город, тип кузова, цвет -->
+                    <div class="col-md-4">
+                        <label for="id_city" class="form-label">Город</label>
+                        {{ form.city|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_body_type" class="form-label">Тип кузова</label>
+                        {{ form.body_type|add_class:"form-select" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_color" class="form-label">Цвет</label>
+                        {{ form.color|add_class:"form-control" }}
+                    </div>
+
+                    <!-- Трансмиссия, привод, руль -->
+                    <div class="col-md-4">
+                        <label for="id_transmission" class="form-label">КПП</label>
+                        {{ form.transmission|add_class:"form-select" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_drive" class="form-label">Привод</label>
+                        {{ form.drive|add_class:"form-select" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_steering_wheel" class="form-label">Руль</label>
+                        {{ form.steering_wheel|add_class:"form-select" }}
+                    </div>
+
+                    <!-- Двигатель -->
+                    <div class="col-md-6">
+                        <label for="id_engine" class="form-label">Тип двигателя</label>
+                        {{ form.engine|add_class:"form-select" }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_engine_capacity" class="form-label">Объем двигателя (л)</label>
+                        {{ form.engine_capacity|add_class:"form-control" }}
+                    </div>
+
+                    <!-- Таможня и кредит -->
+                    <div class="col-md-6">
+                        <div class="form-check mt-4">
+                            {{ form.customs_cleared|add_class:"form-check-input" }}
+                            <label class="form-check-label" for="id_customs_cleared">
+                                Растаможен
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-4">
+                            {{ form.credit_available|add_class:"form-check-input" }}
+                            <label class="form-check-label" for="id_credit_available">
+                                Возможность в кредит
+                            </label>
+                        </div>
+                    </div>
+
+                     <!-- Фото -->
+                    <div class="col-12">
+                        <label class="form-label">Фото автомобиля</label>
+                    
+                        <div id="formset-container">
+                            {{ image_formset.management_form }}  <!-- ПЕРЕМЕСТИЛ СЮДА -->
+                    
+                            {% for image_form in image_formset.forms %}
+                                <div class="mb-3 image-form position-relative">
+                                    {{ image_form.image.errors }}
+                                    {{ image_form.image|add_class:"form-control image-input" }}
+                                    <img src="#" class="img-thumbnail mt-2 d-none preview" style="max-width: 200px;">
+                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image">×</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    
+                        <button type="button" class="btn btn-outline-secondary mt-2" id="add-image">Добавить фото</button>
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="col-12">
+                        <label for="id_description" class="form-label">Описание</label>
+                        {{ form.description|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-4">Разместить объявление</button>
+                </div>
+            </form>
+
+            <!-- Шаблон пустой формы -->
+            <div id="empty-form-template" class="d-none">
+                <div class="mb-3 image-form position-relative">
+                    <input type="file" name="form-__prefix__-image" class="form-control image-input" id="id_form-__prefix__-image">
+                    <img src="#" class="img-thumbnail mt-2 d-none preview" style="max-width: 200px;">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-image">×</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const formsetContainer = document.getElementById('formset-container');
+    const addButton = document.getElementById('add-image');
+    const emptyFormHtml = document.getElementById('empty-form-template').innerHTML;
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+    function handlePreview(input) {
+        const preview = input.closest('.image-form').querySelector('.preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '#';
+            preview.classList.add('d-none');
+        }
+    }
+
+    function handleRemove(button) {
+        const container = button.closest('.image-form');
+        container.remove();
+        // Обновляем индексы форм
+        const forms = formsetContainer.querySelectorAll('.image-form');
+        totalForms.value = forms.length;
+        forms.forEach((formEl, index) => {
+            const input = formEl.querySelector('input[type="file"]');
+            input.name = `form-${index}-image`;
+            input.id = `id_form-${index}-image`;
+        });
+    }
+
+    // Обработчики для существующих форм
+    formsetContainer.querySelectorAll('.image-input').forEach(input => {
+        input.addEventListener('change', () => handlePreview(input));
+    });
+
+    formsetContainer.querySelectorAll('.remove-image').forEach(button => {
+        button.addEventListener('click', () => handleRemove(button));
+    });
+
+    addButton.addEventListener('click', function () {
+        const formIndex = parseInt(totalForms.value);
+        const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formIndex);
+        const newFormNode = document.createElement('div');
+        newFormNode.innerHTML = newFormHtml;
+        formsetContainer.appendChild(newFormNode);
+        totalForms.value = formIndex + 1;
+
+        const input = newFormNode.querySelector('input[type="file"]');
+        const removeBtn = newFormNode.querySelector('.remove-image');
+
+        input.addEventListener('change', () => handlePreview(input));
+        removeBtn.addEventListener('click', () => handleRemove(removeBtn));
+    });
+});
+</script>
+{% endblock %}
