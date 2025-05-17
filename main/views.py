@@ -277,7 +277,7 @@ def create_new_car(request):
 
 def new_car_detail(request, pk):
     car = get_object_or_404(NewCar, pk=pk)
-    return render(request, 'new_car_detail.html', {'car': car})
+    return render(request, 'main/cars/new_car_detail.html', {'car': car})
 
 
 
@@ -328,12 +328,29 @@ def delete_car(request, car_id):
 
 def dealership_detail(request, pk):
     dealership = get_object_or_404(AutoCenter, pk=pk)
-    brands = dealership.brands.all()  # если у тебя есть связь dealership <-> Brand
-    cars = NewCar.objects.filter(auto_center=dealership, is_approved=True)  # Только верифицированные
+    brands = dealership.brands.all()
+    cars = NewCar.objects.filter(auto_center=dealership, is_approved=True)
+
+    # Фильтрация по GET-параметрам
+    brand = request.GET.get('brand')
+    model = request.GET.get('model')
+    year = request.GET.get('year')
+
+    if brand:
+        cars = cars.filter(brand=brand)
+    if model:
+        cars = cars.filter(model=model)
+    if year:
+        cars = cars.filter(year=year)
+
+    models = NewCar.objects.filter(auto_center=dealership, is_approved=True).values_list('model', flat=True).distinct()
+    years = NewCar.objects.filter(auto_center=dealership, is_approved=True).values_list('year', flat=True).distinct().order_by('-year')
 
     context = {
         'dealership': dealership,
         'brands': brands,
         'cars': cars,
+        'models': models,
+        'years': years,
     }
     return render(request, 'main/cars/dealership_detail.html', context)

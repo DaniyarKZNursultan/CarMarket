@@ -1,6 +1,7 @@
 {% extends 'main/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load number_filters %}
 
 {% block content %}
 <div class="container py-5">
@@ -55,17 +56,19 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
       {% for car in filtered_cars %}
         <div class="col">
-          <div class="card h-100 border-0 shadow-sm">
-            {% if car.preview_image %}
-              <img src="{{ car.preview_image }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
-              <p class="card-text text-muted mb-1">Год: {{ car.year }}</p>
-              <p class="card-text mb-1">Цена: <strong>{{ car.price|floatformat:0 }} ₸</strong></p>
-              <small class="text-muted">Город: {{ car.city }}</small>
+          <a href="{% url 'new_car_detail' car.id %}" class="text-decoration-none text-dark">
+            <div class="card h-100 border-0 shadow-sm">
+              {% if car.preview_image %}
+                <img src="{{ car.preview_image }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                <p class="card-text text-muted mb-1">Год: {{ car.year }}</p>
+                <p class="card-text mb-1">Цена: <strong>{{ car.price|format_price }} ₸</strong></p>
+                <small class="text-muted">Город: {{ car.city }}</small>
+              </div>
             </div>
-          </div>
+          </a>
         </div>
       {% empty %}
         <div class="col">
@@ -81,16 +84,18 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
       {% for car in popular_cars %}
         <div class="col">
-          <div class="card h-100 border-0 shadow-sm">
-            {% if car.preview_image %}
-              <img src="{{ car.preview_image }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
-              <p class="card-text text-muted mb-1">Год: {{ car.year }}</p>
-              <p class="card-text">Цена: <strong>{{ car.price|floatformat:0 }} ₸</strong></p>
+          <a href="{% url 'new_car_detail' car.id %}" class="text-decoration-none text-dark">
+            <div class="card h-100 border-0 shadow-sm">
+              {% if car.preview_image %}
+                <img src="{{ car.preview_image }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                <p class="card-text text-muted mb-1">Год: {{ car.year }}</p>
+                <p class="card-text">Цена: <strong>{{ car.price|format_price }} ₸</strong></p>
+              </div>
             </div>
-          </div>
+          </a>
         </div>
       {% endfor %}
     </div>
@@ -109,7 +114,7 @@
               {% endif %}
               <div class="card-body">
                 <h5 class="card-title">{{ salon.name }}</h5>
-                <p class="card-text text-muted">{{ salon.city }}</p>
+                <p class="card-text text-muted">{{ salon.get_city_display }}</p>
                 <p class="card-text">{{ salon.address }}</p>
                 <p class="card-text"><strong>Тел:</strong> {{ salon.phone }}</p>
               </div>

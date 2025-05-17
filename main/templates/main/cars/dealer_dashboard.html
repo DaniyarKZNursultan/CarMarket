@@ -1,6 +1,7 @@
 <!-- dealer_dashboard.html -->
 {% extends 'main/base.html' %}
 {% load static %}
+{% load number_filters %}
 
 {% block content %}
 <div class="container my-5">
@@ -21,8 +22,8 @@
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
-                <p class="card-text">{{ car.year }} • {{ car.price|floatformat:0 }} ₸</p>
-                <p class="card-text"><small class="text-muted">{{ car.city }}</small></p>
+                <p class="card-text">{{ car.year }} • {{ car.price|format_price }} ₸</p>
+                <p class="card-text"><small class="text-muted">{{ car.get_city_display }}</small></p>
                 <p class="card-text">
                   {% if car.is_approved %}
                     <span class="badge bg-success">Одобрено</span>

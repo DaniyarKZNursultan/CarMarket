@@ -1,5 +1,8 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load humanize %}
+{% load number_filters %}
+
 
 {% block title %}{{ dealership.name }} - CarMarket{% endblock %}
 
@@ -7,10 +10,11 @@
 <div class="container mt-4">
     <!-- Шапка автодилера -->
     <div class="card mb-4 border-0 shadow-sm">
+        
         <div class="row g-0">
-            <div class="col-md-3 d-flex align-items-center justify-content-center bg-light p-4">
-                {% if dealership.logo %}
-                <img src="{{ dealership.logo.url }}" class="img-fluid" alt="{{ dealership.name }}" style="max-height: 120px;">
+            <div class="col-md-3 d-flex align-items-center justify-content-center bg-light">
+                {% if dealership.images %}
+                    <img src="{{ dealership.images.url }}" class="img-fluid" alt="{{ dealership.name }}">
                 {% else %}
                 <div class="text-center text-muted">
                     <i class="bi bi-building fs-1"></i>
@@ -45,28 +49,31 @@
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
             <h5 class="card-title mb-3">Фильтр автомобилей</h5>
-            <form class="row g-3">
+            <form class="row g-3" method="get">
                 <div class="col-md-3">
-                    <select class="form-select">
-                        <option selected>Марка</option>
-                        <option>Все</option>
+                    <select class="form-select" name="brand">
+                        <option value="">Марка</option>
+                        <option value="">Все</option>
                         {% for brand in brands %}
-                        <option>{{ brand }}</option>
+                        <option value="{{ brand }}" {% if request.GET.brand == brand %}selected{% endif %}>{{ brand }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select">
-                        <option selected>Модель</option>
-                        <option>Все</option>
+                    <select class="form-select" name="model">
+                        <option value="">Модель</option>
+                        <option value="">Все</option>
+                        {% for model in models %}
+                        <option value="{{ model }}" {% if request.GET.model == model %}selected{% endif %}>{{ model }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select">
-                        <option selected>Год</option>
-                        <option>Все</option>
+                    <select class="form-select" name="year">
+                        <option value="">Год</option>
+                        <option value="">Все</option>
                         {% for year in years %}
-                        <option>{{ year }}</option>
+                        <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -75,7 +82,7 @@
                         <i class="bi bi-funnel"></i> Применить
                     </button>
                 </div>
-            </form>
+            </form>            
         </div>
     </div>
 
@@ -86,33 +93,32 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for car in cars %}
         <div class="col">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="position-relative">
-                    {% if car.image %}
-                    <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.brand }} {{ car.model }}" style="height: 200px; object-fit: cover;">
-                    {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                        <i class="bi bi-car-front fs-1 text-muted"></i>
+            <a href="{% url 'new_car_detail' car.id %}" class="text-decoration-none text-dark">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        {% if car.preview_image %}
+                            <img src="{{ car.preview_image }}" class="card-img-top" alt="{{ car.brand }} {{ car.model }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-car-front fs-1 text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <span class="position-absolute top-0 end-0 bg-primary text-white p-2 small">
+                            {{ car.year }} год
+                        </span>
                     </div>
-                    {% endif %}
-                    <span class="position-absolute top-0 end-0 bg-primary text-white p-2 small">
-                        {{ car.year }} год
-                    </span>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">{{ car.get_body_type_display }}</span>
+                            <span class="text-muted small">{{ car.get_transmission_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-primary fs-5">{{ car.price|format_price }} ₸</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small">{{ car.mileage }} км</span>
-                        <span class="text-muted small">{{ car.get_transmission_display }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold text-primary fs-5">{{ car.price }} ₸</span>
-                        {% comment %} <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-outline-primary">
-                            Подробнее <i class="bi bi-chevron-right"></i>
-                        </a> {% endcomment %}
-                    </div>
-                </div>
-            </div>
+            </a>
         </div>
         {% endfor %}
     </div>
@@ -124,16 +130,6 @@
 </div>
 
 <style>
-    .card {
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    .breadcrumb {
-        background-color: #f8f9fa;
-    }
     .badge.border {
         border: 1px solid #dee2e6 !important;
     }
