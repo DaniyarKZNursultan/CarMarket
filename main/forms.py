@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
-from .models import KAZAKHSTAN_CITIES, CarBrand, CarImage, NewCar, User, UsedCar
+from .models import KAZAKHSTAN_CITIES, CarBrand, CarImage, NewCar, NewCarImage, User, UsedCar
 
 class RegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=50)
@@ -86,4 +86,27 @@ class NewCarForm(forms.ModelForm):
             self.fields['brand'].queryset = CarBrand.objects.none()
 
 
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
 
+class ImageUploadForm(forms.Form):
+    images = forms.FileField(
+        widget=MultiFileInput(attrs={'multiple': True}),
+        required=False
+    )
+
+
+# class NewCarImageForm(forms.ModelForm):
+#     class Meta:
+#         model = NewCarImage
+#         fields = ['image']
+#         widgets = {
+#             'image': forms.ClearableFileInput(attrs={'class': 'form-control'})
+#         }
+
+# NewCarImageFormSet = forms.modelformset_factory(
+#     NewCarImage,
+#     form=NewCarImageForm,
+#     extra=5,  # можно менять количество форм под загрузку
+#     max_num=10
+# )

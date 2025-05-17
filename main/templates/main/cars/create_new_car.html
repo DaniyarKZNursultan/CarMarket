@@ -4,42 +4,426 @@
 
 {% block content %}
 <div class="container my-5">
-  <h2 class="mb-4">Добавить новое авто</h2>
-  <form method="post" enctype="multipart/form-data" class="row g-3 bg-light p-4 rounded shadow-sm">
-    {% csrf_token %}
-
-    {% for field in form %}
-      <div class="col-md-6">
-        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-
-        {% if field.field.choices %}
-          <!-- Для полей с выбором (например, select) добавляем класс form-select -->
-          {{ field|add_class:"form-select" }}
-        {% elif field.field.widget.input_type == "checkbox" %}
-          <!-- Для булевых полей (checkbox) добавляем класс form-check-input -->
-          <div class="form-check">
-            {{ field|add_class:"form-check-input" }}
-            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-          </div>
-        {% else %}
-          <!-- Для всех остальных полей, таких как текстовые поля, добавляем form-control -->
-          {{ field|add_class:"form-control" }}
-        {% endif %}
-
-        {% if field.errors %}
-          <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
-        {% endif %}
+  <div class="card shadow-lg rounded-4 overflow-hidden border-0">
+    <div class="card-header bg-gradient-primary text-white py-4">
+      <div class="d-flex align-items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-car-front-fill me-3" viewBox="0 0 16 16">
+          <path d="M2.52 3.515A2.5 2.5 0 0 1 4.82 2h6.362c1 0 1.904.596 2.298 1.515l.792 1.848c.075.175.21.319.38.404.5.25.855.715.965 1.262l.335 1.679c.033.161.049.325.049.49v.413c0 .814-.39 1.543-1 1.997V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.338c-1.292.048-2.745.088-4 .088s-2.708-.04-4-.088V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.892c-.61-.454-1-1.183-1-1.997v-.413a2.5 2.5 0 0 1 .049-.49l.335-1.68c.11-.546.465-1.012.964-1.261a.807.807 0 0 0 .381-.404l.792-1.848ZM3 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM6 8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H6ZM2.906 5.189a.51.51 0 0 0 .497.731c.91-.073 3.35-.17 4.597-.17 1.247 0 3.688.097 4.597.17a.51.51 0 0 0 .497-.731l-.956-1.913A.5.5 0 0 0 11.691 3H4.309a.5.5 0 0 0-.447.276L2.906 5.19Z"/>
+        </svg>
+        <div>
+          <h2 class="mb-0 fw-bold">Добавить новое авто</h2>
+          <p class="mb-0 opacity-75">Заполните информацию о автомобиле</p>
+        </div>
       </div>
-    {% endfor %}
-
-    <div class="col-md-12">
-      <label class="form-label">Изображения автомобиля</label>
-      <input type="file" name="images" class="form-control" multiple>
     </div>
 
-    <div class="col-12 text-end">
-      <button type="submit" class="btn btn-primary">Добавить</button>
-    </div>
-  </form>
+    <form id="car-form" method="post" enctype="multipart/form-data" class="card-body px-5 py-4" action="{% url 'create_new_car' %}">
+      {% csrf_token %}
+
+      <!-- Основные характеристики -->
+      <div class="row g-4 mb-4">
+        <h5 class="fw-semibold border-bottom pb-2 d-flex align-items-center">
+          <i class="bi bi-card-checklist text-primary me-2"></i> Основные характеристики
+        </h5>
+        
+        <!-- Бренд -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark">Бренд</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-tag-fill text-primary"></i></span>
+            {{ car_form.brand|add_class:"form-select" }}
+          </div>
+          {% if car_form.brand.errors %}
+            <div class="text-danger small mt-1">{{ car_form.brand.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- Модель -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark">Модель</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-car-front text-primary"></i></span>
+            {{ car_form.model|add_class:"form-control"|attr:"placeholder:Например: Camry" }}
+          </div>
+          {% if car_form.model.errors %}
+            <div class="text-danger small mt-1">{{ car_form.model.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- Год выпуска -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-dark">Год выпуска</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-calendar3 text-primary"></i></span>
+            {{ car_form.year|add_class:"form-control"|attr:"placeholder:Например: 2020" }}
+          </div>
+          {% if car_form.year.errors %}
+            <div class="text-danger small mt-1">{{ car_form.year.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- Цена -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-dark">Цена</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-currency-dollar text-primary"></i></span>
+            {{ car_form.price|add_class:"form-control"|attr:"placeholder:Например: 25000" }}
+          </div>
+          {% if car_form.price.errors %}
+            <div class="text-danger small mt-1">{{ car_form.price.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- Объем двигателя -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-dark">Объем двигателя (л)</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-speedometer2 text-primary"></i></span>
+            {{ car_form.engine_capacity|add_class:"form-control"|attr:"placeholder:Например: 2.5" }}
+          </div>
+          {% if car_form.engine_capacity.errors %}
+            <div class="text-danger small mt-1">{{ car_form.engine_capacity.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- Цвет -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-dark">Цвет</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-palette-fill text-primary"></i></span>
+            {{ car_form.color|add_class:"form-select" }}
+          </div>
+          {% if car_form.color.errors %}
+            <div class="text-danger small mt-1">{{ car_form.color.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- Гарантия -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-dark">Гарантия (лет)</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-shield-check text-primary"></i></span>
+            {{ car_form.warranty_years|add_class:"form-control"|attr:"placeholder:Например: 2" }}
+          </div>
+          {% if car_form.warranty_years.errors %}
+            <div class="text-danger small mt-1">{{ car_form.warranty_years.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        
+        <!-- VIN-код -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold text-dark">VIN-код</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-upc-scan text-primary"></i></span>
+            {{ car_form.vin|add_class:"form-control"|attr:"placeholder:17-значный код" }}
+          </div>
+          {% if car_form.vin.errors %}
+            <div class="text-danger small mt-1">{{ car_form.vin.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Дополнительные характеристики -->
+      <div class="row g-4 mb-4">
+        <h5 class="fw-semibold border-bottom pb-2 d-flex align-items-center">
+          <i class="bi bi-gear-fill text-primary me-2"></i> Дополнительные характеристики
+        </h5>
+        
+        {% for field in car_form %}
+          {% if field.name not in 'brand,model,year,price,engine_capacity,color,warranty_years,vin' %}
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark" for="{{ field.id_for_label }}">
+                {% if field.name == 'engine' %}Двигатель
+                {% elif field.name == 'transmission' %}Коробка передач
+                {% elif field.name == 'description' %}Описание
+                {% elif field.name == 'city' %}Город
+                {% elif field.name == 'body_type' %}Тип кузова
+                {% elif field.name == 'drive' %}Трансмиссия
+                {% elif field.name == 'steering_wheel' %}Руль
+                {% elif field.name == 'customs_cleared' %}Растаможен
+                {% elif field.name == 'credit_available' %}Возможен в кредит
+                {% elif field.name == 'in_stock' %}В наличии
+                {% else %}
+                  {{ field.label }}
+                {% endif %}
+              </label>
+
+              {% if field.field.choices %}
+                {{ field|add_class:"form-select" }}
+              {% elif field.field.widget.input_type == "checkbox" %}
+                <div class="form-check form-switch">
+                  {{ field|add_class:"form-check-input" }}
+                  <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                </div>
+              {% elif field.name == 'description' %}
+                {{ field|add_class:"form-control"|attr:"rows:3"|attr:"placeholder:Подробное описание автомобиля..." }}
+              {% else %}
+                {{ field|add_class:"form-control" }}
+              {% endif %}
+
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Фотографии -->
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <div class="border rounded-3 p-4 bg-light">
+            <h5 class="fw-semibold mb-4 d-flex align-items-center">
+              <i class="bi bi-images text-primary me-2"></i> Фотографии автомобиля
+            </h5>
+            
+            <input type="file" id="image-upload" multiple accept="image/*" hidden>
+            
+            <div class="d-flex align-items-center gap-3">
+              <button type="button" class="btn btn-primary px-4" onclick="document.getElementById('image-upload').click();">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Выбрать фото
+              </button>
+              <small class="text-muted">Максимум 10 фото (JPEG, PNG)</small>
+            </div>
+            
+            <div id="preview" class="row mt-4 g-3"></div>
+            
+            <div class="alert alert-info mt-3 d-flex align-items-center">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              Первое загруженное фото будет главным изображением автомобиля
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 d-flex justify-content-between">
+          <button type="reset" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-arrow-counterclockwise me-2"></i> Очистить
+          </button>
+          <button type="submit" class="btn btn-success px-4 py-2 fw-bold">
+            <i class="bi bi-check-circle-fill me-2"></i> Добавить автомобиль
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
+
+<style>
+  .card {
+    overflow: hidden;
+    border: none;
+  }
+  
+  .card-header {
+    background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+  }
+  
+  .form-control, .form-select {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  }
+  
+  .input-group-text {
+    border-radius: 8px 0 0 8px !important;
+    border-right: none;
+  }
+  
+  #preview .col-md-3 {
+    position: relative;
+    transition: transform 0.2s;
+  }
+  
+  #preview .col-md-3:hover {
+    transform: translateY(-3px);
+  }
+  
+  #preview img {
+    height: 180px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+  }
+  
+  #preview button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(220, 53, 69, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    width: 28px;
+    height: 28px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  
+  #preview button:hover {
+    background: #dc3545;
+    transform: scale(1.1);
+  }
+  
+  .form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    margin-left: -2.5em;
+  }
+  
+  .bg-light {
+    background-color: #f8f9fa !important;
+  }
+  
+  .border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+  }
+</style>
+
+<script>
+  const input = document.getElementById('image-upload');
+  const preview = document.getElementById('preview');
+  const form = document.getElementById('car-form');
+  let selectedFiles = [];
+  const MAX_FILES = 10;
+
+  input.addEventListener('change', function() {
+    if (this.files.length + selectedFiles.length > MAX_FILES) {
+      alert(`Можно загрузить не более ${MAX_FILES} фотографий`);
+      return;
+    }
+    
+    for (const file of this.files) {
+      if (!file.type.match('image.*')) continue;
+      
+      if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        selectedFiles.push(file);
+      }
+    }
+    
+    updatePreview();
+    input.value = '';
+  });
+
+  function updatePreview() {
+    preview.innerHTML = '';
+    
+    if (selectedFiles.length === 0) {
+      preview.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <i class="bi bi-images fs-1 text-muted"></i>
+          <p class="text-muted mt-2">Нет выбранных фотографий</p>
+        </div>
+      `;
+      return;
+    }
+    
+    selectedFiles.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const col = document.createElement('div');
+        col.classList.add('col-md-3', 'col-6');
+        col.innerHTML = `
+          <div class="position-relative">
+            <img src="${e.target.result}" alt="preview" class="img-fluid">
+            <button type="button" data-index="${index}" title="Удалить">
+              <i class="bi bi-x"></i>
+            </button>
+            ${index === 0 ? '<span class="badge bg-primary position-absolute bottom-0 start-0 m-2">Главное</span>' : ''}
+          </div>
+        `;
+        preview.appendChild(col);
+
+        col.querySelector('button').addEventListener('click', ev => {
+          const idx = parseInt(ev.target.closest('button').getAttribute('data-index'));
+          selectedFiles.splice(idx, 1);
+          updatePreview();
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Инициализация пустого превью
+  updatePreview();
+
+  form.addEventListener('submit', function(e) {
+    if (selectedFiles.length === 0) {
+      e.preventDefault();
+      alert('Пожалуйста, загрузите хотя бы одно фото автомобиля');
+      return;
+    }
+    
+    // Проверка обязательных полей
+    const requiredFields = [
+      'brand', 'model', 'year', 'price', 
+      'engine_capacity', 'color', 'warranty_years', 'vin'
+    ];
+    
+    let missingFields = [];
+    
+    requiredFields.forEach(field => {
+      if (!form.elements[field] || !form.elements[field].value.trim()) {
+        missingFields.push(
+          field === 'brand' ? 'Бренд' :
+          field === 'model' ? 'Модель' :
+          field === 'year' ? 'Год выпуска' :
+          field === 'price' ? 'Цена' :
+          field === 'engine_capacity' ? 'Объем двигателя' :
+          field === 'color' ? 'Цвет' :
+          field === 'warranty_years' ? 'Гарантия' :
+          field === 'vin' ? 'VIN-код' : field
+        );
+      }
+    });
+    
+    if (missingFields.length > 0) {
+      e.preventDefault();
+      alert('Пожалуйста, заполните все обязательные поля:\n' + missingFields.join('\n'));
+      return;
+    }
+    
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    const formData = new FormData();
+
+    for (const [key, value] of new FormData(form).entries()) {
+      if (key !== 'images') formData.append(key, value);
+    }
+
+    selectedFiles.forEach(file => formData.append('images', file));
+
+    fetch(form.action || '', {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrfToken},
+      body: formData,
+    })
+    .then(response => {
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else {
+        return response.json();
+      }
+    })
+    .then(data => {
+      if (data && data.errors) {
+        alert('Ошибка: ' + Object.values(data.errors).join('\n'));
+      }
+    })
+    .catch(err => console.error('Ошибка отправки:', err));
+  });
+</script>
 {% endblock %}

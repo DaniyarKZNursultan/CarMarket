@@ -1,7 +1,7 @@
 from django.forms import modelformset_factory
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CarImageFormSet, NewCarFilterForm, NewCarForm, RegistrationForm, LoginForm, UsedCarForm
+from .forms import CarImageFormSet, ImageUploadForm, NewCarFilterForm, NewCarForm, RegistrationForm, LoginForm, UsedCarForm
 from django.views.generic import ListView, TemplateView
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
@@ -257,22 +257,29 @@ class NewCarPageView(TemplateView):
 @user_passes_test(is_dealer)
 def create_new_car(request):
     if request.method == 'POST':
-        form = NewCarForm(request.POST, request.FILES, user=request.user)
-        if form.is_valid():
-            car = form.save(commit=False)
-            car.created_by = request.user
-            car.auto_center = request.user.auto_center
-            car.save()
-
+        car_form = NewCarForm(request.POST)
+        images = request.FILES.getlist('images')  # Получаем файлы сразу
+        
+        if car_form.is_valid():
+            # Сохраняем авто с привязкой к дилеру
+            new_car = car_form.save(commit=False)
+            new_car.dealer = request.user.dealer  # Предполагая, что у вас есть профиль дилера
+            new_car.save()
+            
             # Сохраняем изображения
-            if 'images' in request.FILES:
-                for img in request.FILES.getlist('images'):
-                    NewCarImage.objects.create(car=car, image=img)
-
-            return redirect('dealer_dashboard')
+            for img in images:
+                NewCarImage.objects.create(car=new_car, image=img)
+            
+            # Редирект на страницу успеха или список авто
+            return redirect('dealer_dashboard')  # Используем имя URL, не путь к шаблону
+            
     else:
-        form = NewCarForm(user=request.user)
-    return render(request, 'main/cars/create_new_car.html', {'form': form})
+        car_form = NewCarForm()
+    
+    return render(request, 'main/cars/create_new_car.html', {
+        'car_form': car_form,
+    })
+
 
 
 def new_car_detail(request, pk):
